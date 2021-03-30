@@ -5,7 +5,7 @@
 # Document  ：链表数据结构，包含单链表，单项循环列表，双向链表，双向循环列表
 
 
-class Node:
+class Node(object):
     """单节点"""
     
     def __init__(self, data, next=None):
@@ -111,33 +111,252 @@ class SingleCircleLink(SingleLink):
         super().__init__()
     
     def add(self, data):
-        """头向增加"""
-        pass
+        """头向增加，头指针指向新节点，尾指针指向新节点"""
+        node = Node(data)
+        
+        if self.is_empty():
+            self.head = node
+            node.next = node
+        else:
+            # 尾指针指向新节点
+            wei = self.head
+            while wei.next != self.head:
+                wei = wei.next
+            wei.next = node
+            # 头指针指向新节点
+            node.next = self.head
+            self.head = node
+
     
     def append(self, data):
         """尾向增加"""
-        pass
+        node = Node(data)
+        if self.is_empty():
+            self.head = node
+            node.next = node
+        else:
+            wei = self.head
+            while wei.next != self.head:
+                wei = wei.next
+            wei.next = node
+            node.next = self.head
     
     def remove(self, data):
         """删除一个指定节点"""
-        pass
+        if self.is_empty():
+            return
+        pre = None
+        tmp = self.head
+        while tmp.next != self.head:
+            if tmp.data == data:
+                if pre == None:
+                    # 删除首节点
+                    pre = self.head
+                    while pre.next != self.head:
+                        pre = pre.next
+                    pre.next = self.head.next
+                    tmp = tmp.next
+                    return
+                else:
+                    pre.next = tmp.next
+                    tmp = tmp.next
+            else:
+                pre = tmp
+                tmp = tmp.next
+            
+        if tmp.data == data:
+            pre.next = tmp.next
+        
     
     def length(self):
         """返回链表的长度"""
-        pass
+        if self.is_empty():
+            return 0
+        index = 1
+        tmp = self.head
+        while tmp.next != self.head:
+            index += 1
+            tmp = tmp.next
+        return index
     
     def travel(self):
         """遍历所有节点"""
-        pass
+        if self.is_empty():
+            return
+        
+        res = []
+        tmp = self.head
+        while tmp.next != self.head:
+            res.append(tmp.data)
+            tmp = tmp.next
+        res.append(tmp.data)
+        return res
     
     def search(self, data):
         """查找数据是否存在"""
-        pass
+        index = 0
+        if self.is_empty():
+            return False
+        tmp = self.head
+        while tmp.next != self.head:
+            if tmp.data == data:
+                return index
+            index += 1
+            tmp = tmp.next
+        if tmp.data == data:
+            return index
+        return False
 
 
-class Tree:
-    pass
+class DoubleNode(object):
+    """双向节点"""
+    def __init__(self, data, prev=None, next=None):
+        self.data = data
+        self.prev = prev
+        self.next = next
 
 
-if __name__ == '__main__':
-    pass
+class DoubleLink(SingleLink):
+    """双向链表"""
+    
+    def __init__(self):
+        super().__init__()
+        
+    def add(self, data):
+        """头向增加数据"""
+        node = DoubleNode(data)
+        if self.is_empty():
+            self.head = node
+        else:
+            node.next = self.head
+            self.head.prev = node
+            self.head = node
+    
+    def append(self, data):
+        """尾部增加数据"""
+        node = DoubleNode(data)
+        if self.is_empty():
+            self.head = node
+        else:
+            tmp = self.head
+            while tmp.next is not None:
+                tmp = tmp.next
+            tmp.next = node
+            node.prev = tmp
+    
+    def insert(self, pos, data):
+        """指定位置插入数据"""
+        if pos <= 0 :
+            self.add(data)
+        elif pos > self.length() - 1:
+            self.append(data)
+        else:
+            index = 0
+            node = DoubleNode(data)
+            tmp = self.head
+            while index < pos - 1:
+                tmp = tmp.next
+                index += 1
+            node.next = tmp.next
+            node.prev = tmp
+            tmp.next.prev = node
+            tmp.next = node
+
+    
+    def remove(self, data):
+        """删除指定数据"""
+        if self.is_empty():
+            return
+        elif self.head.data == data:
+            if self.head.next is None:
+                self.head = None
+            else:
+                self.head = self.head.next
+                self.head.prev = None
+        else:
+            tmp = self.head
+            while tmp.next is not None:
+                if tmp.data == data:
+                    tmp.next.prev = tmp.prev
+                    tmp.prev.next = tmp.next
+                    return
+                tmp = tmp.next
+            if tmp.data == data:
+                tmp.prev.next = None
+
+
+
+class DoubleCircleLink(SingleCircleLink):
+    
+    """双向循环列表"""
+    
+    def __init__(self):
+        super().__init__()
+        
+    def add(self, data):
+        """前向增加数据"""
+        node = DoubleNode(data)
+        if self.is_empty():
+            self.head = node
+            node.next = node
+            node.prev = node
+        else:
+            node.next = self.head
+            node.prev = self.head.prev
+            
+            self.head.prev.next = node
+            self.head.prev = node
+            self.head = node
+            
+
+    def append(self, data):
+        """尾向增加数据"""
+        node = DoubleNode(data)
+        if self.is_empty():
+            self.head = node
+            node.next = node
+            node.prev = node
+        else:
+            self.head.prev.next = node
+            node.prev = self.head.prev
+            self.head.prev = node
+            node.next = self.head
+        
+    
+    def remove(self, data):
+        """删除特定数据"""
+        if self.is_empty():
+            return
+        elif self.head.data == data:
+            if self.length() == 1:
+                self.head = None
+            else:
+                self.head.prev.next = self.head.next
+                self.head.next.prev = self.head.prev
+                self.head = self.head.next
+        else:
+            tmp = self.head.next
+            while tmp != self.head:
+                if tmp.data == data:
+                    tmp.prev.next = tmp.next
+                    tmp.next.prev = tmp.prev
+                tmp = tmp.next
+
+    
+    def insert(self, pos, data):
+        """指定位置插入数值"""
+        if pos <= 0:
+            self.add(data)
+        elif pos > self.length() - 1:
+            self.append(data)
+        else:
+            node = DoubleNode(data)
+            index = 0
+            tmp = self.head
+            while index < pos -1:
+                index += 1
+                tmp = tmp.next
+            node.next = tmp.next
+            tmp.next.prev = node
+            node.prev = tmp
+            tmp.next = node
